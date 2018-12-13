@@ -16,16 +16,25 @@ public class App extends JFrame {
         });
     }
     
+    private JTextArea output = null;
+    
     public void init() {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setLayout(new BorderLayout());
         
+        this.output = new JTextArea(5, 20);
+        this.output.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(this.output); 
+        
         JButton button = new JButton("Who is here?");
         button.addActionListener((evt) -> {
-          System.err.println("BUTTON!");
+          this.output.append("BUTTON!" + System.lineSeparator());
         });
-        this.add(button, BorderLayout.CENTER);
+        
+        
+        this.add(this.output, BorderLayout.CENTER);
+        this.add(button, BorderLayout.SOUTH);
         
         this.setVisible(true);
         
