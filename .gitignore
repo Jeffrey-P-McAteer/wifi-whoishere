@@ -1,0 +1,13 @@
+docs/*
+build/*
+.gradle/*
+gradle/*
+gradlew
+gradlew.bat
+# Ignore intelliJ IDEA File-based project format
+*.iws
+.idea
+out/*
+*.log
+*.db-journal
+Data/*
