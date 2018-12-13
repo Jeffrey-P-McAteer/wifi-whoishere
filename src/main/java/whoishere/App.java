@@ -3,12 +3,31 @@
  */
 package whoishere;
 
-public class App {
-    public String getGreeting() {
-        return "Hello world.";
-    }
+import javax.swing.*;
+import java.awt.*;
 
+public class App extends JFrame {
+    /**
+     * App init point
+     */
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            new App().init();
+        });
+    }
+    
+    public void init() {
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
+        this.setLayout(new BorderLayout());
+        
+        JButton button = new JButton("Who is here?");
+        button.addActionListener((evt) -> {
+          System.err.println("BUTTON!");
+        });
+        this.add(button, BorderLayout.CENTER);
+        
+        this.setVisible(true);
+        
     }
 }
