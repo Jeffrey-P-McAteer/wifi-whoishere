@@ -35,7 +35,7 @@ public class App extends JFrame {
             // Hop off GUI thread to do work
             new Thread(() -> {
                 if (isUnix()) {
-                    final String output = execCmd("ping -c 10 224.0.0.1") + System.lineSeparator();
+                    final String output = getFormattedMACs();
                     // Hop back on GUI thread to set text
                     SwingUtilities.invokeLater(() -> {
                         this.output.append(output);
@@ -60,7 +60,7 @@ public class App extends JFrame {
         });
         
         
-        this.add(this.output, BorderLayout.CENTER);
+        this.add(scrollPane, BorderLayout.CENTER);
         this.add(button, BorderLayout.SOUTH);
         
         this.pack();
@@ -97,13 +97,75 @@ public class App extends JFrame {
         }
     }
     
-    public static java.util.List<String> pingAndGetIpsUnix() {
+    // We use the "ping" utility
+    public static java.util.List<String> pingAndGetIpsUnix()
+    {
         ArrayList<String> parsed_ips = new ArrayList<>();
-        String ping_payload = execCmd("ping -c 2 224.0.0.1");
-        
-        // TODO
+        String ping_payload = execCmd("ping -c 3 224.0.0.1");
+        for (String line : ping_payload.split(System.lineSeparator())) {
+            // Line is like:
+            // 64 bytes from 192.168.86.37: icmp_seq=1 ttl=64 time=86.5 ms (DUP!)
+            if (!line.contains("bytes from")) {
+                continue; // Ignore lines we don;t want (headers, empty lines, etc)
+            }
+            String[] chunks = line.split(" ");
+            // Check to make sure we have at least 4 seperate words, if not continue
+            if (chunks.length < 4) {
+                continue;
+            }
+            String ip = chunks[3].replaceAll(":", ""); // A dumb way to get the semicolon at the end off
+            // Only add IP if new
+            if (!parsed_ips.contains(ip)) {
+                parsed_ips.add(ip);
+            }
+        }
         
         return parsed_ips;
+    }
+    
+    // We use the "arp" utility, this returns a map from IP => MAC
+    public static HashMap<String, String> getArpTableUnix()
+    {
+        HashMap<String, String> map = new HashMap<>();
+        String arp_payload = execCmd("arp -a");
+        
+        for (String line : arp_payload.split(System.lineSeparator())) {
+            String[] chunks = line.split(" ");
+            if (chunks.length < 4) {
+                continue; // We ignore any line with fewer than 4 words
+            }
+            
+            String hostname = chunks[0];
+            String ip = chunks[1];
+            String mac = chunks[3];
+            
+            if (mac.equals("<incomplete>")) {
+                continue; // Happens when you have ARP entries on the docker0 interface
+            }
+            
+            if (!map.containsKey(ip)) {
+                map.put(ip, mac);
+            }
+        }
+        
+        return map;
+    }
+    
+    public static String getFormattedMACs()
+    {
+        if (isUnix()) {
+            StringBuilder sb = new StringBuilder();
+            HashMap<String, String> ips_and_macs = getArpTableUnix();
+            for (String mac : ips_and_macs.values()) {
+                sb.append(mac);
+                sb.append(System.lineSeparator());
+            }
+            
+            return sb.toString();
+        }
+        else {
+            return "Idk? Bluescreening in 3, 2, 1...";
+        }
     }
     
 }
