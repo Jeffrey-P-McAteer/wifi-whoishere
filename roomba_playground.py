@@ -5,6 +5,7 @@
 
 from roomba import Roomba
 import json, time
+import os
 
 # Speech outputs
 import pyttsx
@@ -49,7 +50,9 @@ say('I am docking the roomba.')
 time.sleep(1)
 say('I am observing the roomba.')
 
+total_secs_taken_to_dock = 0
 while True:
+    total_secs_taken_to_dock += 2.25
     time.sleep(2)
     string = json.dumps(myroomba.master_state, indent=2)
     print string
@@ -64,10 +67,17 @@ while True:
     
     if "Charging" in myroomba.current_state:
       say('The roomba has completed docking.')
-      time.sleep(5)
+      time.sleep(3)
       say('The roomba has completed docking.')
       break
 
 myroomba.disconnect()
 
+time.sleep(2)
+
+say("The roomba took "+str(int(total_secs_taken_to_dock))+" seconds to dock")
+print "The roomba took "+str(int(total_secs_taken_to_dock))+" seconds to dock"
+
+time.sleep(0.30)
+os.system("aplay sounds/and_thats_the_way_news_goes.wav")
 
