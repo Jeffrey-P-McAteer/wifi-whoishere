@@ -24,6 +24,9 @@ dependencies {
     // This dependency is found on compile classpath of this component and consumers.
     implementation 'com.google.guava:guava:26.0-jre'
 
+    // This lets us talk to the roomba
+    implementation 'com.maschel:roombajssc:1.1.0'
+
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
@@ -32,10 +35,6 @@ jar {
     manifest {
         attributes 'Main-Class': 'whoishere.App'
     }
-}
-
-dependencies {
-    implementation 'com.maschel:roombajssc:1.1.0'
 }
 
 // Define the main class for the application
