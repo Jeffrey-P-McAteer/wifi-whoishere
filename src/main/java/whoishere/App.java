@@ -50,6 +50,11 @@ public class App extends JFrame {
                 else {
                     System.err.println("Unknown OS!");
                 }
+
+                // Roomba nonsense
+                com.maschel.roomba.RoombaJSSC roomba = new com.maschel.roomba.RoombaJSSCSerial();
+                System.err.println("roomba="+roomba);
+
             }).start();
         });
         
