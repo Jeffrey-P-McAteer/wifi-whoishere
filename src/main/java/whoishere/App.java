@@ -22,7 +22,7 @@ public class App extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setLayout(new BorderLayout());
-        this.setTitle("Who is here?");
+        this.setTitle("Who the hell is here?");
         this.setPreferredSize(new Dimension(400, 300));
         
         this.output = new JTextArea(5, 20);
