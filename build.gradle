@@ -28,5 +28,11 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'whoishere.App'
+    }
+}
+
 // Define the main class for the application
 mainClassName = 'whoishere.App'
