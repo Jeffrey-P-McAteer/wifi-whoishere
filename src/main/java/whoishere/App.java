@@ -97,9 +97,9 @@ public class App extends JFrame {
         }
     }
     
-    public static List<String> pingAndGetIpsUnix() {
+    public static java.util.List<String> pingAndGetIpsUnix() {
         ArrayList<String> parsed_ips = new ArrayList<>();
-        String ping_payload = String output = execCmd("ping -c 2 224.0.0.1");
+        String ping_payload = execCmd("ping -c 2 224.0.0.1");
         
         // TODO
         
