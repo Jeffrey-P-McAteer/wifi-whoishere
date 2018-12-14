@@ -37,8 +37,8 @@ public class App extends JFrame {
         this.output.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(this.output); 
         
-        JButton button = new JButton("Who is here?");
-        button.addActionListener((evt) -> {
+        JButton fetch_people = new JButton("Who is here?");
+        fetch_people.addActionListener((evt) -> {
             // Hop off GUI thread to do work
             new Thread(() -> {
                 if (isUnix()) {
@@ -59,16 +59,40 @@ public class App extends JFrame {
                     System.err.println("Unknown OS!");
                 }
 
-                // Roomba nonsense
-                com.maschel.roomba.RoombaJSSC roomba = new com.maschel.roomba.RoombaJSSCSerial();
-                System.err.println("roomba="+roomba);
-
             }).start();
         });
         
+        JButton go_roomba = new JButton("Roomba GO!");
+        go_roomba.addActionListener((evt) -> {
+            
+            com.maschel.roomba.RoombaJSSC roomba = new com.maschel.roomba.RoombaJSSCSerial();
+            System.err.println("roomba="+roomba);
+            String[] ports = roomba.portList();
+            System.err.println("ports.length="+ports.length);
+            for (String port : ports) {
+                System.err.println("port="+port);
+                
+                // Attempt to connect
+                roomba.connect(port);
+                
+                // Attempt to start up?
+                roomba.startup();
+                
+                roomba.digitLedsAscii('H', 'E', 'Y', '!'); // Shows message on digit leds
+                
+            }
+            
+        });
         
+        // Pane with border style layout
+        JPanel lower_buttons = new JPanel(new BorderLayout());
+        lower_buttons.add(fetch_people, BorderLayout.WEST);
+        lower_buttons.add(go_roomba, BorderLayout.EAST);
+        
+        // Scrollpane is centermost element
         this.add(scrollPane, BorderLayout.CENTER);
-        this.add(button, BorderLayout.SOUTH);
+        // All buttons fall south
+        this.add(lower_buttons, BorderLayout.SOUTH);
         
         this.pack();
         
