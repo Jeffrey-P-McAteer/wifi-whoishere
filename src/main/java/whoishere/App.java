@@ -5,7 +5,14 @@ package whoishere;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
+import java.net.*;
 import java.util.*;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 public class App extends JFrame {
     /**
@@ -137,7 +144,7 @@ public class App extends JFrame {
             
             String hostname = chunks[0];
             String ip = chunks[1];
-            String mac = chunks[3];
+            String mac = chunks[3].toLowerCase();
             
             if (mac.equals("<incomplete>")) {
                 continue; // Happens when you have ARP entries on the docker0 interface
@@ -155,9 +162,13 @@ public class App extends JFrame {
     {
         if (isUnix()) {
             StringBuilder sb = new StringBuilder();
+            // Ping everyone to fill the ARP table
+            pingAndGetIpsUnix();
             HashMap<String, String> ips_and_macs = getArpTableUnix();
             for (String mac : ips_and_macs.values()) {
                 sb.append(mac);
+                String vendor = getVendorForMacFromCache(mac);
+                sb.append(" - "+vendor);
                 sb.append(System.lineSeparator());
             }
             
@@ -167,5 +178,92 @@ public class App extends JFrame {
             return "Idk? Bluescreening in 3, 2, 1...";
         }
     }
+    
+    // We first try to get vendor from a filesystem cache, falling back to the API at api.macvendors.com when we don't know.
+    // Ideally we will only call api.macvendors.com once or twice per run.
+    public static String getVendorForMacFromCache(String mac)
+    {
+        try {
+            String path_to_cache_dir = System.getProperty("user.home") + File.separator + ".wifi-whoishere-vendorcache";
+            File cache_dir = new File(path_to_cache_dir);
+            if (!cache_dir.exists()) {
+                cache_dir.mkdirs();
+            }
+            
+            File mac_cached_file = new File(path_to_cache_dir + File.separator + mac + ".txt");
+            // ^^ We will appease the windows gods with a .txt file extension. Ideally you'd just use the MAC entirely.
+            if (!mac_cached_file.exists()) {
+                System.err.println("Querying API for vendor of unknown MAC "+mac+"...");
+                String vendor = doHTTPGET("https://api.macvendors.com/" + mac).trim();
+                System.err.println("Vendor "+mac+" is "+vendor);
+                // Only record vendor when we know them
+                if (vendor.length() > 1) {
+                    writeStringToFile(mac_cached_file, vendor);
+                }
+                else {
+                    // If we have an empty vendor return an empty string instead of writing emptystring to file
+                    return "";
+                }
+            }
+            
+            // Read the cache; return contents of file
+            return readFileToString(mac_cached_file).trim();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    
+    public static String doHTTPGET(String urlToRead)
+    {
+        try {
+            StringBuilder result = new StringBuilder();
+            URL url = new URL(urlToRead);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = rd.readLine()) != null) {
+                result.append(line);
+            }
+            rd.close();
+            return result.toString();
+        }
+        catch (Exception e) {
+            // Only if you are curious why you get no data
+            //e.printStackTrace();
+            return "";
+        }
+    }
+
+    // Overload of readFileToString(String) taking a File
+    public static String readFileToString(File file) {
+        return readFileToString(file.getAbsolutePath());
+    }
+    
+    // Stolen from https://howtodoinjava.com/java/io/java-read-file-to-string-examples/
+    public static String readFileToString(String filePath)
+    {
+        StringBuilder contentBuilder = new StringBuilder();
+        try (Stream<String> stream = Files.lines( Paths.get(filePath), StandardCharsets.UTF_8)) {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return contentBuilder.toString();
+    }
+    
+    public static void writeStringToFile(File target, String payload)
+    {
+        try (PrintWriter out = new PrintWriter(target.getAbsolutePath())) {
+            out.print(payload);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+ 
     
 }
