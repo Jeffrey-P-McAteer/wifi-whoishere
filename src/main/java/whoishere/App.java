@@ -5,6 +5,7 @@ package whoishere;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
 
 public class App extends JFrame {
     /**
@@ -34,7 +35,7 @@ public class App extends JFrame {
             // Hop off GUI thread to do work
             new Thread(() -> {
                 if (isUnix()) {
-                    final String output = execCmd("ping -c 1 224.0.0.1") + System.lineSeparator();
+                    final String output = execCmd("ping -c 10 224.0.0.1") + System.lineSeparator();
                     // Hop back on GUI thread to set text
                     SwingUtilities.invokeLater(() -> {
                         this.output.append(output);
@@ -90,4 +91,14 @@ public class App extends JFrame {
           return "";
         }
     }
+    
+    public static List<String> pingAndGetIpsUnix() {
+        ArrayList<String> parsed_ips = new ArrayList<>();
+        String ping_payload = String output = execCmd("ping -c 2 224.0.0.1");
+        
+        // TODO
+        
+        return parsed_ips;
+    }
+    
 }
