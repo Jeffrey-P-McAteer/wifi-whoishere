@@ -11,7 +11,7 @@ public class App extends JFrame {
      * App init point
      */
     public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             new App().init();
         });
     }
