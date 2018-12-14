@@ -16,18 +16,18 @@ myroomba = Roomba(address, blid, roombaPassword)
 #or myroomba = Roomba() #if you have a config file - will attempt discovery if you don't
 myroomba.connect()
 
-#print("Starting...")
-#myroomba.send_command("start")
+print("Starting...")
+myroomba.send_command("start")
 
-#time.sleep(20)
-#print("Stopping...")
+time.sleep(10)
+print("Docking...")
 
 #myroomba.send_command("stop")
+
 myroomba.send_command("dock")
 
-#import json, time
-#for i in range(5):
-#    print json.dumps(myroomba.master_state, indent=2)
-#    time.sleep(1)
+while True:
+    print json.dumps(myroomba.master_state, indent=2)
+    time.sleep(1)
 
 myroomba.disconnect()
