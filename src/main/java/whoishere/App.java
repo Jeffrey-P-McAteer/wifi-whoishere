@@ -22,6 +22,8 @@ public class App extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setLayout(new BorderLayout());
+        this.setTitle("Who is here?");
+        this.setPreferredSize(new Dimension(400, 300));
         
         this.output = new JTextArea(5, 20);
         this.output.setEditable(false);
@@ -29,14 +31,63 @@ public class App extends JFrame {
         
         JButton button = new JButton("Who is here?");
         button.addActionListener((evt) -> {
-          this.output.append("BUTTON!" + System.lineSeparator());
+            // Hop off GUI thread to do work
+            new Thread(() -> {
+                if (isUnix()) {
+                    final String output = execCmd("ping -c 1 224.0.0.1") + System.lineSeparator();
+                    // Hop back on GUI thread to set text
+                    SwingUtilities.invokeLater(() -> {
+                        this.output.append(output);
+                    });
+                }
+                else if (isWindows()) {
+                    final String output = execCmd("ping /n 1 224.0.0.1") + System.lineSeparator();
+                    // Hop back on GUI thread to set text
+                    SwingUtilities.invokeLater(() -> {
+                        this.output.append(output);
+                    });
+                }
+                else {
+                    System.err.println("Unknown OS!");
+                }
+            }).start();
         });
         
         
         this.add(this.output, BorderLayout.CENTER);
         this.add(button, BorderLayout.SOUTH);
         
+        this.pack();
+        
         this.setVisible(true);
         
+    }
+    
+    public static boolean isWindows() {
+        return osName().contains("win");
+    }
+    
+    public static boolean isMac() {
+        return osName().contains("mac");
+    }
+    
+    public static boolean isUnix() {
+        return osName().contains("nux");
+    }
+    
+    public static String osName() {
+        return System.getProperty("os.name").toLowerCase();
+    }
+    
+    public static String execCmd(String cmd) {
+        try {
+          // Magic. It's Magic.
+          java.util.Scanner s = new java.util.Scanner(Runtime.getRuntime().exec(cmd).getInputStream()).useDelimiter("\\A");
+          return s.hasNext() ? s.next() : "";
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+          return "";
+        }
     }
 }
