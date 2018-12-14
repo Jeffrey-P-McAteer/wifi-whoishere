@@ -9,3 +9,5 @@ out/*
 *.log
 *.db-journal
 Data/*
+Dustyroomba_map.html
+style.css
