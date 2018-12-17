@@ -1,0 +1,10 @@
+[Unit]
+Description=Pulls a git repo
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c "cd /opt/wifi-whoishere/ ; git pull"
+
+[Install]
+WantedBy=syncstuff.target
+

@@ -1,0 +1,10 @@
+[Unit]
+Description=Automatically run syncstuff.service every five minutes
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+
